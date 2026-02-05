@@ -1,12 +1,12 @@
-# 算法笔记
+# C++算法笔记
 
 ---
 
 
 
-## 基础语法
+## 基础语法与环境配置
 
-#### 基本模板
+#### 万能竞赛模板
 
 - ```C++
   #include<bits/stdc++.h>			// 万能头文件
@@ -35,55 +35,35 @@
 
 
 
-#### 输入输出
+#### 输入输出技巧
 
-- ```C++
-   
-   cout<<fixed<<setprecision(n); // 指定输出小数位数
-   
-  string str;
-  getline(cin,str);	// 按行输入,包括空格
-  
-  getline(cin,str,',');	// 以char类型的字符','为分隔符进行输入
-  while(getline(cin,str,',')){
-      //.....
-  }
-  ```
-  
-- 
+- 浮点数控制: `cout<<fixed<<setprecision(n);`
+- 整行读入: `getline(cin,str);`
+- 自定义分隔符: `getline(cin,str,',')`
 
-#### 数据类型
 
-- ##### 转换
 
-  ```C++
-  int num=c-'0';	// 字符char转int
-  char c=num +'0';	// 整型int转char
-  string str=to_string(num);	// 整形int转string
-  int num=stoi(str);	// 字符串string转int
-  long long num_ll=stoll(str);	// 字符串string转long long
-  
-  char ch=toupper(c);	// 小写转大写
-  char ch=tolower(c);	// 大写转小写
-  ```
+#### 数据类型转换与判断
 
-- ##### 判断
-
-  - 数值判断`isdigit()`.
-  - 字符判断`isalpha()`.
-  - 
-  
+|    操作类型    |              方法               |
+| :------------: | :-----------------------------: |
+|   字符->数字   |       `int num = c -'0';`       |
+|   数字->字符   |      `char c = num +'0';`       |
+|  数字->字符串  | `string str = to_string(num);`  |
+|  字符串->整形  |      `int num = stoi(str)`      |
+| 字符串->长整形 | `long long num_ll = stoll(str)` |
+|   大小写转换   |   `toupper(c)`, `tolower(c)`    |
+|  数据类型判断  |   `isdigit(c)`, `isalpha(c)`    |
 
 
 
 #### 数学函数
 
-- ##### 基础函数
+- ##### 常用内置函数
 
-  - 绝对值 `abs()`.
-  - 开平方 `sqrt()`.
-  - 最值 `max(a,b)`, `min(a,b)`. 
-  - 最大公约数`gcd(a,b)`, 最小公倍数`lcm(a,b)`
+  -  `max(a,b)`, `min(a,b)`. `abs()`. `sqrt()`.
+  - `hypot(dx, dy)`：直接计算 $\sqrt{dx^2 + dy^2}$，防止溢出。
+  - `gcd(a, b)` / `lcm(a, b)`：最大公约数与最小公倍数。
 
 - ##### 模板函数
 
@@ -150,8 +130,8 @@
       }
       return res;
   }
-  // 递归写法
   
+  // 递归写法
   long long modpow(long long a, long long b){
       if (b == 1)return a;
       long long res = modpow(a, b >> 1);
@@ -182,7 +162,7 @@
   (index-Δstep%n+n)%n;		// 逆时针循环
   ```
   
-  - 两点间距直接函数
+  - 两点间距 $\sqrt {(x_1-x_2)^2+(y_1-y_2)^2}$
   
   ```C++
   hypot(x1-x2,y1-y2);		// 返回两点间距
@@ -196,19 +176,15 @@
 
 - #### 位运算
 
-  - 奇偶判断
-
-  ```c++
-  (n&1)==1?"奇数":"偶数";
-  ```
+  - 奇偶判断 `(n&1)==1?"奇数":"偶数";`
 
   - 运算结论
-
+  
   ```C++
   a+b=a|b --> a&b=0 // 推导
   
   ```
-
+  
   
 
 ---
@@ -221,15 +197,15 @@
 
 - ```C++
   auto itA=v.begin(); // 指向容器第一个元素,*it表示实际存储的值
-   auto itB=v.end(); //指向最后一个元素的下一个位置,*it报错
-   for(auto it=v.begin();it!=v.end();it++);// 遍历
-   
-   auto itA=v.rbegin(); // 指向容器最后一个元素
-   auto itB=v.rend(); //指向第一个元素的前一个位置
-   for(auto it=v.rbegin();it!=v.rend();it++);// 逆序遍历
-   
-   min_element(v.begin(),v.end());	// 返回指向最小值的迭代器
-   max_element(v.begin(),v.end());	// *max_element得到具体值
+  auto itB=v.end(); //指向最后一个元素的下一个位置,*it报错
+  for(auto it=v.begin();it!=v.end();it++);// 遍历
+  
+  auto itA=v.rbegin(); // 指向容器最后一个元素
+  auto itB=v.rend(); //指向第一个元素的前一个位置
+  for(auto it=v.rbegin();it!=v.rend();it++);// 逆序遍历
+  
+  min_element(v.begin(),v.end());	// 返回指向最小值的迭代器
+  max_element(v.begin(),v.end());	// *max_element得到具体值
   ```
 
 ####  algorithm
