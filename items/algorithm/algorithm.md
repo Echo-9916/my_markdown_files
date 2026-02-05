@@ -100,8 +100,7 @@
   }
   ```
   
-  
-      2. **Factorial** ( 阶乘, 全排列 )
+  ​	2. **Factorial** ( 阶乘, 全排列 )
   
   ```C++
   const int MAX_N=.....;
