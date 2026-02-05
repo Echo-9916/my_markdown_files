@@ -99,11 +99,11 @@
     return true;
   }
   ```
-
-
-  2. **Factorial** ( 阶乘 )
-
-  ```c++
+  
+  
+      2. **Factorial** ( 阶乘, 全排列 )
+  
+  ```C++
   const int MAX_N=.....;
   long long fact[MAX_N];
   
@@ -114,9 +114,9 @@
       }
   }
   ```
-
+  
   3. **GCD,LCM**  ( 辗转相除法 )     
-
+  
   ```C++
   // 递归版
   long long gcd(long long a, long long b) {
@@ -137,6 +137,34 @@
       return (a / gcd(a, b)) * b;
   }
   ```
+  
+  4. **($A^B) \% MOD$** ( 快速幂 ) 
+  
+  ```C++
+  // 迭代写法
+  long long modpow(long long a, long long b){
+      long long res = 1;
+      while (b > 0){
+          if (b & 1)res = res * a % MOD;	// 二进制最后一位为 1的情况
+          a = a * a % MOD;
+          b >>= 1;	// 幂次减半
+      }
+      return res;
+  }
+  // 递归写法
+  
+  long long modpow(long long a, long long b){
+      if (b == 1)return a;
+      long long res = modpow(a, b >> 1);
+      res = res * res % MOD;
+      if (b & 1)return a * res % MOD;
+      return res;
+  }
+  ```
+  
+  - 补充: **费马小定理**
+
+
 
   
 
@@ -174,6 +202,15 @@
   ```c++
   (n&1)==1?"奇数":"偶数";
   ```
+
+  - 运算结论
+
+  ```C++
+  a+b=a|b --> a&b=0 // 推导
+  
+  ```
+
+  
 
 ---
 
