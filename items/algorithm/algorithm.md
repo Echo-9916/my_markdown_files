@@ -2,6 +2,10 @@
 
 ---
 
+[TOC]
+
+
+
 
 
 ## 基础语法与环境配置
@@ -13,7 +17,7 @@
   using namespace std;
   
   using ll=long long;				// 简化long long 数据类型的声明
-  const int MOD=998244353;		// 取模值
+  const int MOD=998244353;		// 取模值(质数),也有1e9+7
   
   void solve(){}					// 实际解决方案
   
@@ -80,12 +84,10 @@
   }
   ```
   
-  ​	2. **Factorial** ( 阶乘, 全排列 )
+  ​	2. **Factorial** ( 阶乘 )
   
   ```C++
-  const int MAX_N=.....;
-  long long fact[MAX_N];
-  
+  vector<long long> fact(2e5,1);
   void Factorial(long long n){
       fact[0] = 1;
       for (int i = 1; i < MAX_N; i++){
@@ -120,19 +122,21 @@
   4. **($A^B) \% MOD$** ( 快速幂 ) 
   
   ```C++
+  // MOD一般在全局定义
   // 迭代写法
-  long long modpow(long long a, long long b){
+  long long qpow(int a, int b){
       long long res = 1;
+      a%=MOD;	// 防止 a过大,直接对其取模
       while (b > 0){
           if (b & 1)res = res * a % MOD;	// 二进制最后一位为 1的情况
-          a = a * a % MOD;
+          a = a * a % MOD;	// 底数进行平方
           b >>= 1;	// 幂次减半
       }
       return res;
   }
   
   // 递归写法
-  long long modpow(long long a, long long b){
+  long long qpow(int a, int b){
       if (b == 1)return a;
       long long res = modpow(a, b >> 1);
       res = res * res % MOD;
@@ -141,7 +145,6 @@
   }
   ```
   
-  - 补充: **费马小定理**
 
 
 
@@ -168,24 +171,48 @@
   hypot(x1-x2,y1-y2);		// 返回两点间距
   ```
   
+  - 取模运算
+  
+  ```C++
+  (a+b)%MOD = a%MOD + b%MOD;	// 满足结合律
+  (a*b)%MOD = a%MOD * b%MOD;
+  
+  (a-b)%MOD = (a%MOD - b%MOD + MOD)%MOD;	// 不允许有负数
+  
+  // 费马小定理: 求a在模p下的乘法逆元
+  long long inv(long long a){	// MOD在全局定义
+      return modpow(a,MOD-2);
+  }
+  ```
+  
   
 
 ​    
 
 
 
-- #### 位运算
+#### 位运算
 
-  - 奇偶判断 `(n&1)==1?"奇数":"偶数";`
+- 运算结论
 
-  - 运算结论
-  
-  ```C++
-  a+b=a|b --> a&b=0 // 推导
-  
-  ```
-  
-  
+|  序号   | 公式表达                     | 结论说明                               |
+| :-----: | ---------------------------- | :------------------------------------- |
+|    1    | a+b = ab --> a&b=0           | 推导                                   |
+|    2    | a^b to min                   | 二进制为 1 的位数尽可能靠左,尽可能相同 |
+|    3    | n & (n-1)                    | 判断 n 是否为 2 的整数幂次             |
+|    4    | num & 1                      | 判断 num的最低位是否为1 (奇数)         |
+|    5    | 0^a = a                      | 0与a的异或和为 a                       |
+|    6    | a\^a\^a\^a\^...\^a\^a\^a = 0 | 任意个相同数的异或和为 0               |
+| 7 (5&6) | a\^a\^a\^a\^...\^a\^a\^B = B | 找出一堆相同数中不同的数               |
+|    8    | a<<=b                        | 把a的二进制序列向左位移b位,即$a*2^b$   |
+|    9    | x \| y==y                    | 说明二进制序列中,x为1的位置y都为1      |
+|   10    | a >> b & 1                   | 获取 a 的第 b 位编号                   |
+|   11    | a & ~(1 << b)                | 将 a 的第 b 位设置为 0                 |
+|   12    | a \| (1 << b)                | 将 a 的第 b 位设置为 1                 |
+|   13    | a ^ (1 << b)                 | 将 a 的第 b 位取反                     |
+|         |                              |                                        |
+
+
 
 ---
 
@@ -526,9 +553,125 @@
 
 ## 基础算法
 
-#### 模拟/枚举
+#### 前缀和/差分
 
-严格遵循题目规则，不重不漏地穷举所有可能状态
+- 一维前缀和
+
+  - 通过 O(n）时间预处理，能够将单次复杂度降低到 O(1）
+
+  - 对于数组 $a_n$ ,序列的前缀和为$S_i=\sum_{j=1}^{i}a_j $ ,递推关系式为$S_0=0,S_i=S_{i-1}+a_i$​
+
+  - 想要询问区间 [l,r]内的序列和,只需要计算差值$S([l,r])=S_r-S_{l-1}$​
+
+- ```C++
+  int n;                // 数组大小.
+  std::vector<int> a;   // 数组. (下标从 1 开始)
+  std::vector<int> prefix;  // 前缀和数组.
+  
+  // 计算前缀和
+  void prefix_sum() {
+    prefix = a;
+    for (int i = 1; i <= n; ++i) {
+      prefix[i] += prefix[i - 1];
+    }
+    // Or 简化:
+    // std::partial_sum(a.begin(), a.end(), ps.begin());
+  }
+  
+  // 查询 [l, r] 区间内的元素的和
+  int query(int l, int r) { return prefix[r] - prefix[l - 1]; }
+  ```
+
+- 二维前缀和
+
+  - 给定大小为 $m\times n $的二维数组 A,求出其前缀和 S,则S的大小同样为 $m\times n $ 且$S_{i,j}=\sum_{i^{\prime}\leq i}\sum_{j^{\prime}\leq j}A_{i^{\prime},j^{\prime}}.$​
+  - 基于容斥原理,得到递推关系  $S_{i,j}=A_{i,j}+S_{i-1,j}+S_{i,j-1}-S_{i-1,j-1}.$​
+  - 要想查询子矩阵的和,则计算  $S_{i_2,j_2}-S_{i_1-1,j_2}-S_{i_2,j_1-1}+S_{i_1-1,j_1-1}$,时间复杂度降到O(mn)​
+
+- ```C++
+  int n, m;
+  std::vector<std::vector<int>> a, ps;  // (n + 1) x (m + 1).
+  
+  // 计算二维数组的前缀和
+  void prefix_sum() {
+    ps = a;
+    for (int i = 1; i <= n; ++i)
+      for (int j = 1; j <= m; ++j)
+        ps[i][j] += ps[i - 1][j] + ps[i][j - 1] - ps[i - 1][j - 1];
+  }
+  
+  // 查找在 [x1, y1] 到 [x2, y2] 的子矩阵的元素和
+  int query(int x1, int y1, int x2, int y2) {
+    return ps[x2][y2] - ps[x1 - 1][y2] - ps[x2][y1 - 1] + ps[x1 - 1][y1 - 1];
+  }
+  ```
+
+- 一维差分
+
+  - 前缀和的逆运算, 一般是通过维护差分序列信息, 对区间多次修改后恢复原序列, 实现对原序列的查询
+  - 对于数组 $a_n$, 差分序列为 $D_i=a_i-a_{i-1}, a_0=0$, 差分序列的前缀和即为原数组
+  - 区间操作,在区间 [l,r]中的每个数都加上一个值v, 则 $D_l=D_l+v, D_{r+1}=D_{r+1}-v$​
+
+- ```C++
+  int n;
+  std::vector<int> diff, a;
+  
+  // 为区间 [l, r]内所有元素加值 v
+  void add(int l, int r, int v) {
+    diff[l] += v;
+    if (r < n) diff[r + 1] -= v;
+  }
+  
+  // 在所有修改之后,查询之前执行前缀和操作恢复原序列
+  void prefix_sum() {
+    for (int i = 1; i <= n; ++i) a[i] = a[i - 1] + diff[i];
+  }
+  ```
+
+- 二维差分
+
+  - 多维差分可看作多维前缀和的逆运算,则求多维差分数组的操作就相当于根据多维前缀和求它的原数组,即  $D_{i,j}=a_{i,j}-a_{i-1,j}-a_{i,j-1}+a_{i-1,j-1}.$​
+
+  - 要对左上角$(x_1,y_1)$,右下角$(x_2,y_2)$的矩阵中每个数字加上v,可以对其差分数组进行操作
+
+    ​			$$\begin{gathered}
+    D_{x_1,y_1}\leftarrow D_{x_1,y_1}+v, \\
+    D_{x_1,y_2+1}\leftarrow D_{x_1,y_2+1}-v, \\
+    D_{x_2+1,y_1}\leftarrow D_{x_2+1,y_1}-v, \\
+    D_{x_2+1,y_2+1}\leftarrow D_{x_2+1,y_2+1}+v.
+    \end{gathered}$$​
+
+  - 在所有修改操作结束后，只需要执行一遍二维前缀和，就可以快速查询更新后的数组的值
+
+  ```C++
+  int n, m;
+  std::vector<std::vector<int>> diff, a;
+  
+  // 为 [x1, y1] 到 [x2, y2]的每一个元素都加v
+  void add(int x1, int y1, int x2, int y2, int v) {
+    diff[x1][y1] += v;
+    if (x2 < n) diff[x2 + 1][y1] -= v;
+    if (y2 < m) diff[x1][y2 + 1] -= v;
+    if (x2 < n && y2 < m) diff[x2 + 1][y2 + 1] += v;
+  }
+  
+  // 在所有修改之后,查询之前执行前缀和操作恢复原序列.
+  void prefix_sum() {
+    a = diff;
+  
+    for (int i = 1; i <= n; ++i)
+      for (int j = 1; j <= m; ++j) a[i][j] += a[i - 1][j];
+  
+    for (int i = 1; i <= n; ++i)
+      for (int j = 1; j <= m; ++j) a[i][j] += a[i][j - 1];
+  }
+  ```
+
+  
+
+#### 模拟/枚举/倍增
+
+严格遵循题目规则，不重不漏地 (or 有智慧地)穷举所有可能状态
 
 1. **建表查询**: 将**状态抽象化**, 对于日期(仅12个固定值), 方位(上,下,左,右)等可枚举的量,直接建表
 
@@ -537,13 +680,19 @@
    int days[] = {0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31};
    // 数字确定移动方向
    int dir[4][2] = {{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
+   for(int k=0;k<4;k++){
+       int xx=x+dir[k][0],yy=y+dir[k][1];
+       if(边界合法性判断)continue;// 新坐标不合法
+       ...	// 执行解决办法
+   }
    ```
 
-2. **边界划分**: 保证所有过程都在问题之内
+2. **面向过程,结果编程**: 保证所有过程都在问题之内,排演所有结果符合测试集要求
 
-   
+3. 关于枚举: 考虑可能的情况, 枚举的元素, 枚举的空间范围(有优化空间), 枚举顺序
 
     
+
 
 #### 贪心
 
@@ -583,6 +732,12 @@
     > [单调递增的数字](https://leetcode.cn/problems/monotone-increasing-digits/)
     >
     > [划分字母区间](https://leetcode.cn/problems/partition-labels/)
+
+---
+
+
+
+## 搜索
 
 #### backtrack ( 回溯 )
 
@@ -638,7 +793,11 @@
   - 关于优化
     - 组合类问题, 如果仅用于求符合解的个数, 可以使用dp优化[例: 目标和](https://leetcode.cn/problems/target-sum/)
 
-#### Dynamic Programming (动态规划)
+---
+
+
+
+## Dynamic Programming (动态规划)
 
 将一个问题**分解**为一系列更小的子问题，并通过**存储子问题的解**来避免重复计算, 旧状态+决策=新状态
 
@@ -666,77 +825,79 @@
   }
   ```
 
-- 典型类题目->**背包问题**
+#### **背包问题**
 
-  ```mermaid
-  graph LR
-      A[<font color=red><b>背包问题</b></font>] --> B(背包)
-      A --> C(物品)
-  
-      B --> B1(最大容量 v)
-  
-      C --> C1(价值 w)
-      C --> C2(体积 v)
-      C --> C3(每个物品的数量)
-  
-      C3 --> D1(只有一个)
-      C3 --> D2(无数个)
-      C3 --> D3(不同的物品数量不同)
-      C3 --> D4(按组打包每组最多选一个)
-  
-      D1 --> E1(不选)
-      D1 --> E2(选一个)
-      E1 & E2 --> F1[<font color=red>01背包</font>]
-  
-      D2 --> E3(不选)
-      D2 --> E4(选几个)
-      E3 & E4 --> F2[<font color=red>完全背包</font>]
-  
-      D3 --> F3[<font color=red>多重背包</font>]
-      D4 --> F4[<font color=red>分组背包</font>]
-  
-      F1 & F2 & F3 --> G[<font color=red>混合背包</font>]
-  
-      %% 样式定义
-      style A fill:none,stroke:none
-      style F1 stroke:red
-      style F2 stroke:red
-      style F3 stroke:red
-      style F4 stroke:red
-      style G stroke:red
-  ```
+- 
 
-  - 解题步骤( 二维DP数组 ) :
+```mermaid
+graph LR
+    A[<font color=red><b>背包问题</b></font>] --> B(背包)
+    A --> C(物品)
 
-    1. 声明数组`dp[i][j]`: ` i`表示**第i个物品**, `j`表示**容量为 j的背包**,`dp[i][j]`表示从下标为[ 0~i ]的物品里任意取，放进容量为 j的背包，`价值总和最大是多少`
-    2. 状态转移分析: 
-       1. 不放物品 i: 最大价值延续,即`dp[i][j] = dp[i-1][j]`
-       2. 放物品 i: 背包空出物品i的容量,转为`j-weight[i]`后,放物品`+value[i]`,即`dp[i][j] = dp[i-1][ j-weight[i] ]+ value[i]`
-       3. 得出递推公式 `dp[i][j] = max(dp[i - 1][j], dp[i - 1][j - weight[i]] + value[i]);`
+    B --> B1(最大容量 v)
 
-    3. 初始化dp数组: 每一个( i,j )都需要依赖左上方和正上方的解,则`用第1个物品初始化第一行`,从第2个物品开始分析; 背包容量为0时不放物品,则`第一列初始化为0`; 非零下标无需初始化,任意值均可
+    C --> C1(价值 w)
+    C --> C2(体积 v)
+    C --> C3(每个物品的数量)
 
-    4. 遍历顺序( 物品先?背包先? ): 对于01背包的二维DP均可
+    C3 --> D1(只有一个)
+    C3 --> D2(无数个)
+    C3 --> D3(不同的物品数量不同)
+    C3 --> D4(按组打包每组最多选一个)
 
-    5. 打印DP数组( debug ): 
+    D1 --> E1(不选)
+    D1 --> E2(选一个)
+    E1 & E2 --> F1[<font color=red>01背包</font>]
 
-       | 物品(索引 i )\背包容量c  | 0    |      1       |      2       |      3       |      4       |
-       | :----------------------: | ---- | :----------: | :----------: | :----------: | :----------: |
-       | 物品( `0` ), 价值$val_1$ | 0    | 当前最大价值 | 当前最大价值 | 当前最大价值 | 当前最大价值 |
-       | 物品( `1` ), 价值$val_2$ | 0    |              |              |              |              |
-       | 物品( `2` ), 价值$val_3$ | 0    |              |              |              |   `最终解`   |
+    D2 --> E3(不选)
+    D2 --> E4(选几个)
+    E3 & E4 --> F2[<font color=red>完全背包</font>]
 
-    6. 空间优化( 二维DP -> 一维滚动数组 ):
-       - `dp[j]`表示容量为 j的背包，所背的物品价值可以最大为dp[ j ];
-       - 递推公式为`dp[j]=max( dp[j-1], dp[j-weight[i]]+ value[i] )`;
-       - 初始化`dp[0]=0`, `dp[j]=0 (非负数值的最小值,一般取0就可)`
-       - 遍历顺序: 先`顺序遍历物品`,后`倒序遍历背包`, 保证每个物品只被添加一次
+    D3 --> F3[<font color=red>多重背包</font>]
+    D4 --> F4[<font color=red>分组背包</font>]
 
-  - `01背包`模板:
+    F1 & F2 & F3 --> G[<font color=red>混合背包</font>]
 
-  - 以leetcode 416.[分割等和子集](https://leetcode.cn/problems/partition-equal-subset-sum/) 为例(非本题最优解,本题可用`vector<bool>`优化 )
+    %% 样式定义
+    style A fill:none,stroke:none
+    style F1 stroke:red
+    style F2 stroke:red
+    style F3 stroke:red
+    style F4 stroke:red
+    style G stroke:red
+```
 
-  ```C++
+- 解题步骤( 二维DP数组 ) :
+
+  1. 声明数组`dp[i][j]`: ` i`表示**第i个物品**, `j`表示**容量为 j的背包**,`dp[i][j]`表示从下标为[ 0~i ]的物品里任意取，放进容量为 j的背包，`价值总和最大是多少`
+  2. 状态转移分析: 
+     1. 不放物品 i: 最大价值延续,即`dp[i][j] = dp[i-1][j]`
+     2. 放物品 i: 背包空出物品i的容量,转为`j-weight[i]`后,放物品`+value[i]`,即`dp[i][j] = dp[i-1][ j-weight[i] ]+ value[i]`
+     3. 得出递推公式 `dp[i][j] = max(dp[i - 1][j], dp[i - 1][j - weight[i]] + value[i]);`
+
+  3. 初始化dp数组: 每一个( i,j )都需要依赖左上方和正上方的解,则`用第1个物品初始化第一行`,从第2个物品开始分析; 背包容量为0时不放物品,则`第一列初始化为0`; 非零下标无需初始化,任意值均可
+
+  4. 遍历顺序( 物品先?背包先? ): 对于01背包的二维DP均可
+
+  5. 打印DP数组( debug ): 
+
+     | 物品(索引 i )\背包容量c  | 0    |      1       |      2       |      3       |      4       |
+     | :----------------------: | ---- | :----------: | :----------: | :----------: | :----------: |
+     | 物品( `0` ), 价值$val_1$ | 0    | 当前最大价值 | 当前最大价值 | 当前最大价值 | 当前最大价值 |
+     | 物品( `1` ), 价值$val_2$ | 0    |              |              |              |              |
+     | 物品( `2` ), 价值$val_3$ | 0    |              |              |              |   `最终解`   |
+
+  6. 空间优化( 二维DP -> 一维滚动数组 ):
+     - `dp[j]`表示容量为 j的背包，所背的物品价值可以最大为dp[ j ];
+     - 递推公式为`dp[j]=max( dp[j-1], dp[j-weight[i]]+ value[i] )`;
+     - 初始化`dp[0]=0`, `dp[j]=0 (非负数值的最小值,一般取0就可)`
+     - 遍历顺序: 先`顺序遍历物品`,后`倒序遍历背包`, 保证每个物品只被添加一次
+
+- `01背包模板`:
+
+  ​	以leetcode 416.[分割等和子集](https://leetcode.cn/problems/partition-equal-subset-sum/) 为例(非本题最优解,本题可用`vector<bool>`优化 )
+
+- ```C++
   // 二维DP数组
   bool canPartition(vector<int>&nums) {
       int sum = accumulate(nums.begin(), nums.end(), 0);
@@ -778,6 +939,8 @@
   ```
 
   
+
+
 
 ​		
 
