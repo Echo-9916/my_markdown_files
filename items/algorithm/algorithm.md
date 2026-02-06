@@ -45,6 +45,11 @@
 - 整行读入: `getline(cin,str);`
 - 自定义分隔符: `getline(cin,str,',')`
 
+#### 常见存储思维转换:
+
+- 题设与矩阵相关,各行输入的`元素间连续`(同一行内每个元素间无空格),则优先以`vector<string>v`存储[01回文](https://ac.nowcoder.com/acm/contest/120562/I)
+- 需要打表存储固定数据时,可`压缩存储`为0/1矩阵,输出可考虑"`"YN"[条件]`来简化[A+B Problem](https://ac.nowcoder.com/acm/contest/120561/A)|[01矩阵](https://ac.nowcoder.com/acm/contest/120562/E)
+
 
 
 #### 数据类型转换与判断
@@ -63,133 +68,126 @@
 
 #### 数学函数
 
-- ##### 常用内置函数
+##### 常用内置函数
 
-  -  `max(a,b)`, `min(a,b)`. `abs()`. `sqrt()`.
-  - `hypot(dx, dy)`：直接计算 $\sqrt{dx^2 + dy^2}$，防止溢出。
-  - `gcd(a, b)` / `lcm(a, b)`：最大公约数与最小公倍数。
+-  `max(a,b)`, `min(a,b)`. `abs()`. `sqrt()`.
+- `hypot(dx, dy)`：直接计算 $\sqrt{dx^2 + dy^2}$，防止溢出。
+- `gcd(a, b)` / `lcm(a, b)`：最大公约数与最小公倍数。
 
-- ##### 模板函数
+##### 模板函数
 
-  1. **is_prime** ( 素数判断 )
+1. **is_prime** ( 素数判断 )
 
-  ```C++
-  bool isPrime(int n) {
-    if (n < 2) return false;
-    // i * i <= n 可能会溢出，建议写成 i <= n / i
-    for (int i = 2; i <= n / i; i++) {
-        if (n % i == 0) return false;
-    }
-    return true;
-  }
-  ```
-  
-  ​	2. **Factorial** ( 阶乘 )
-  
-  ```C++
-  vector<long long> fact(2e5,1);
-  void Factorial(long long n){
-      fact[0] = 1;
-      for (int i = 1; i < MAX_N; i++){
-          fact[i] = (fact[i - 1] * i) % MOD;
-      }
-  }
-  ```
-  
-  3. **GCD,LCM**  ( 辗转相除法 )     
-  
-  ```C++
-  // 递归版
-  long long gcd(long long a, long long b) {
-      return b == 0 ? a : gcd(b, a % b);
-  }
-  // 非递归版：避免栈溢出（处理极大数字时）
-  long long gcd_iter(long long a, long long b) {
-      while (b) {
-          a %= b;
-          swap(a, b);
-      }
-      return a;
-  }
-  
-  long long lcm(long long a, long long b) {
-      if (a == 0 || b == 0) return 0;
-      // 注意：先除后乘可以防止 a * b 直接相乘导致的溢出
-      return (a / gcd(a, b)) * b;
-  }
-  ```
-  
-  4. **($A^B) \% MOD$** ( 快速幂 ) 
-  
-  ```C++
-  // MOD一般在全局定义
-  // 迭代写法
-  long long qpow(int a, int b){
-      long long res = 1;
-      a%=MOD;	// 防止 a过大,直接对其取模
-      while (b > 0){
-          if (b & 1)res = res * a % MOD;	// 二进制最后一位为 1的情况
-          a = a * a % MOD;	// 底数进行平方
-          b >>= 1;	// 幂次减半
-      }
-      return res;
-  }
-  
-  // 递归写法
-  long long qpow(int a, int b){
-      if (b == 1)return a;
-      long long res = modpow(a, b >> 1);
-      res = res * res % MOD;
-      if (b & 1)return a * res % MOD;
-      return res;
-  }
-  ```
-  
+   ```C++
+   bool isPrime(int n) {
+     if (n < 2) return false;
+     // i * i <= n 可能会溢出，建议写成 i <= n / i
+     for (int i = 2; i <= n / i; i++) {
+         if (n % i == 0) return false;
+     }
+     return true;
+   }
+   ```
 
+ 2.  **Factorial** ( 阶乘 )
 
+     ```C++
+     vector<long long> fact(2e5,1);
+     void Factorial(long long n){// 预处理操作,直接以数组形式调用
+         fact[0] = 1;
+         for (int i = 1; i < MAX_N; i++){
+             fact[i] = (fact[i - 1] * i) % MOD;
+         }
+     }
+     ```
+
+3. **GCD,LCM**  ( 辗转相除法 )     
+
+   ```C++
+   // 递归版
+   long long gcd(long long a, long long b) {
+       return b == 0 ? a : gcd(b, a % b);
+   }
+   // 非递归版：避免栈溢出（处理极大数字时）
+   long long gcd_iter(long long a, long long b) {
+       while (b) {
+           a %= b;
+           swap(a, b);
+       }
+       return a;
+   }
+   
+   long long lcm(long long a, long long b) {
+       if (a == 0 || b == 0) return 0;
+       // 注意：先除后乘可以防止 a * b 直接相乘导致的溢出
+       return (a / gcd(a, b)) * b;
+   }
+   ```
+
+4. **($A^B) \% MOD$​** ( 快速幂 ) 
+
+   ```C++
+   // MOD一般在全局定义
+   // 迭代写法
+   long long qpow(int a, int b){
+       long long res = 1;
+       a%=MOD;	// 防止 a过大,直接对其取模
+       while (b > 0){
+           if (b & 1)res = res * a % MOD;	// 二进制最后一位为 1的情况
+           a = a * a % MOD;	// 底数进行平方
+           b >>= 1;	// 幂次减半
+       }
+       return res;
+   }
+   
+   // 递归写法
+   long long qpow(int a, int b){
+       if (b == 1)return a;
+       long long res = modpow(a, b >> 1);
+       res = res * res % MOD;
+       if (b & 1)return a * res % MOD;
+       return res;
+   }
+   ```
 
   
 
-- ##### 技巧结论
+#####  技巧结论
 
-  - 分数计算 $H(n)=1+\frac{1}{2}+\frac{1}{3}+...+\frac{1}{n}$​
-  
-  ```C++
-  sum += (1.0 / i);	// 用 1.0进行除法,强制转化为浮点运算
-  ```
-  
-  - 约瑟夫环 (如:星期1~7循环).
-  
-  ```C++
-  (index+Δstep)%n;			// 顺时针循环
-  (index-Δstep%n+n)%n;		// 逆时针循环
-  ```
-  
-  - 两点间距 $\sqrt {(x_1-x_2)^2+(y_1-y_2)^2}$
-  
-  ```C++
-  hypot(x1-x2,y1-y2);		// 返回两点间距
-  ```
-  
-  - 取模运算
-  
-  ```C++
-  (a+b)%MOD = a%MOD + b%MOD;	// 满足结合律
-  (a*b)%MOD = a%MOD * b%MOD;
-  
-  (a-b)%MOD = (a%MOD - b%MOD + MOD)%MOD;	// 不允许有负数
-  
-  // 费马小定理: 求a在模p下的乘法逆元
-  long long inv(long long a){	// MOD在全局定义
-      return modpow(a,MOD-2);
-  }
-  ```
-  
-  
+1. 分数计算 $H(n)=1+\frac{1}{2}+\frac{1}{3}+...+\frac{1}{n}$​
 
-​    
+   ```C++
+   sum += (1.0 / i);	// 用 1.0进行除法,强制转化为浮点运算
+   ```
 
+2. 约瑟夫环 (如:星期1~7循环).
 
+   ```C++
+   (index+Δstep)%n;			// 顺时针循环
+   (index-Δstep%n+n)%n;		// 逆时针循环
+   ```
+
+3. 两点间距 $\sqrt {(x_1-x_2)^2+(y_1-y_2)^2}$​
+
+   ```C++
+   hypot(x1-x2,y1-y2);		// 返回两点间距
+   ```
+
+4. 取模运算
+
+   ```C++
+   (a+b)%MOD = a%MOD + b%MOD;	// 满足结合律
+   (a*b)%MOD = a%MOD * b%MOD;
+   
+   (a-b)%MOD = (a%MOD - b%MOD + MOD)%MOD;	// 不允许有负数
+   
+   // 费马小定理: 求a在模p下的乘法逆元
+   long long inv(long long a){	// MOD在全局定义
+       return modpow(a,MOD-2);
+   }
+   ```
+
+   ​    
 
 #### 位运算
 
@@ -284,9 +282,9 @@
 
 #### **string**
 
-- 增删改查
+##### 增删改查
 
-  ```C++
+- ```C++
   strA+=strB;		// 尾部拼接
   str.insert(index,"A");	//指定索引index位置插入字符"A"
   
@@ -294,58 +292,56 @@
   if(pos!=string::npos){}	// 表示查找成功的情况
   ```
 
-  
+##### **reverse** ( 反转字符串 )
 
-- **reverse** ( 反转字符串 )
-
-  ```C++
+- ```C++
   reverse(str.begin(),str.end()); // 无返回值
   ```
 
-- **replace** ( 替换字符 )
+##### **replace** ( 替换字符 )
 
-  ```C++
+- ```C++
   replace(str.begin(),str.end(),'A','B');	// 将所有'A'替换为'B', 无返回值
   ```
 
-- **transform** ( 转换大小写 )
+##### **transform** ( 转换大小写 )
 
-  ```C++
+- ```C++
   transform(s.begin(), s.end(), s.begin(), ::tolower);// 全部转为小写字符
   transform(s.begin(), s.end(), s.begin(), ::tolower);// 全部转为大写字符
   ```
 
-- **substr** ( 分割子串 )
+##### **substr** ( 分割子串 )
 
-  ```C++
+- ```C++
   // substr(起始索引, 字符个数)
   string t=str.substr(0,2); // 从索引0位置开始分割str的两个字符
   ```
 
-- **remove+erase** ( 去除所有空格 )
+##### **remove+erase** ( 去除所有空格 )
 
-  ```C++
+- ```C++
   str.erase(remove(str.begin(),str.end(),' '),str.end());
   
   auto new_end=remove(str.begin(), str.end(), ' ');	// 将所有非空格字符覆盖到容器前面，保持相对顺序,返回的迭代器指向新范围的末尾（第一个被"移除"的空格的位置）
   str.erase(new_end, str.end());	// 从 new_end 到容器末尾的所有元素进行真正的删除
   ```
 
-  
+
 
 #### **vector** ( 动态数组 )
 
-- 一维动态数组声明 
+##### 一维动态数组声明
 
-  ```c++
+- ```C++
   vector<T>v;	// 只声明, 不开辟空间, 后续用v.push_back()插入
   vector<T>v(n);	// 开辟大小为n的空间并初始化为0,可直接用v[i] 
   vector<T>v(str.begin(),str.end());	// 用字符串进行拷贝构造
   ```
 
-- 增删
+##### 增删
 
-  ```c++
+- ```C++
   v.push_back(ele);	// 在数组末尾增添元素ele
   v.pop_back();	// 删除最后一个元素
   
@@ -354,17 +350,17 @@
   v.erase(iteratorA,iteratorB);	// 删除迭代器itA~itB之间的元素
   ```
 
-- 查找
+##### 查找
 
-  ```C++
+- ```C++
   v.empty();	// 判断是否为空
   v.size();	// 返回元素个数
   
   v.begin();	// 返回首元素的值
   v.back();	// 返回尾元素的值
   ```
-  
-  
+
+
 
 #### stack (栈)
 
@@ -401,7 +397,7 @@
 
 #### list (双向链表)
 
-- 适用条件: 保留插入顺序,支持拼接
+- ##### 适用条件: 保留插入顺序,支持拼接
 
 - ```C++
   list<T> lt;
@@ -421,9 +417,9 @@
   lt.back();	// 返回尾元素
   ```
 
-- 反转和排序
+- ##### 反转和排序
 
-  ```C++
+- ```C++
   lt.sort(); // 默认的排序规则从小到大
   lt.sort(greater<T>()); // 降序
   lt.sort(cmp);	// 自定义
@@ -431,7 +427,7 @@
   lt.reverse();
   ```
 
-  
+
 
 #### priority_queue (优先队列)
 
@@ -449,103 +445,103 @@
 
 #### set (集合)
 
-  - **set** ( 所有元素在插入时自动被排序 )
+##### **set** ( 所有元素在插入时自动被排序 )
 
-    - 键值对声明
+- 键值对声明
 
-    ```C++
-    set<T>st;	// 默认构造声明
-    set<T,greater<T1> >st;	// 元素降序排序
-    set<T,decltype(cmp)> st(cmp);	// 自定义排序规则
+- ```C++
+  set<T>st;	// 默认构造声明
+  set<T,greater<T1> >st;	// 元素降序排序
+  set<T,decltype(cmp)> st(cmp);	// 自定义排序规则
+  
+  auto cmp=[](T1 a,T2 b){retrun 表达式(例: a>b );} // 自定义
+  ```
 
-    auto cmp=[](T1 a,T2 b){retrun 表达式(例: a>b );} // 自定义
-    ```
+- 基本操作
 
-    - 基本操作
+- ```C++
+  st.size();	// 返回元素个数(去重后)
+  st.empty();	// 判断是否为空,返回值bool
+  
+  st.insert(ele);	// 插入元素ele
+  st.insert(ele).second // 返回bool值,插入成功为true, 已有元素ele则返回false
+  st.erase(ele);	// 删除元素ele
+  st.erase(it);	// 删除迭代器it所在指向位置的值
+  
+  st.count(ele);	// 返回值为ele的个数
+  st,find(ele);	// 查找元素ele是否存在,存在则返回it,否则返回st.end()
+  ```
 
-    ```C++
-    st.size();	// 返回元素个数(去重后)
-    st.empty();	// 判断是否为空,返回值bool
+  
 
-    st.insert(ele);	// 插入元素ele
-    st.insert(ele).second // 返回bool值,插入成功为true, 已有元素ele则返回false
-    st.erase(ele);	// 删除元素ele
-    st.erase(it);	// 删除迭代器it所在指向位置的值
+##### **multiset** ( 允许容器中有重复的元素 )
 
-    st.count(ele);	// 返回值为ele的个数
-    st,find(ele);	// 查找元素ele是否存在,存在则返回it,否则返回st.end()
-    ```
+- ```C++
+  mset.erase(val); // 删掉所有为val的值
+  
+  mset.erase(mset.rbegin());	// 删掉最大值(默认)
+  ms.erase(prev(ms.end()));	// 同理
+  ms.erase(--ms.end());		// 同上
+  
+  mset.erase(mset.begin());	// 删掉最小值(默认)
+  
+  
+  int getPre(int x){	//TODO 实现找前驱
+      auto it = mset.lower_bound(x);// 找到大于等于x的元素的最大值
+      if(it == mset.begin()) return -1;	
+      else return *prev(it);// 找到第一个比x小的数,prev()返回it的前一个迭代器,也可以用*(--it)
+  }
+  
+  int getBack(int x){	//TODO 实现找后继
+      auto it = mset.upper_bound(x);// 找到第一个比x大的元素
+      if(it == M.end()) return -1;
+      else return *it;
+  }
+  ```
 
-      
 
-  - **multiset** ( 允许容器中有重复的元素 )
 
-    ```C++
-    mset.erase(val); // 删掉所有为val的值
-    
-    mset.erase(mset.rbegin());	// 删掉最大值(默认)
-    ms.erase(prev(ms.end()));	// 同理
-    ms.erase(--ms.end());		// 同上
-    
-    mset.erase(mset.begin());	// 删掉最小值(默认)
-    
-    
-    int getPre(int x){	//TODO 实现找前驱
-        auto it = mset.lower_bound(x);// 找到大于等于x的元素的最大值
-        if(it == mset.begin()) return -1;	
-        else return *prev(it);// 找到第一个比x小的数,prev()返回it的前一个迭代器,也可以用*(--it)
-    }
-    
-    int getBack(int x){	//TODO 实现找后继
-        auto it = mset.upper_bound(x);// 找到第一个比x大的元素
-        if(it == M.end()) return -1;
-        else return *it;
-    }
-    ```
-
-    
-
-  - **unordered_set** ( 仅用来去重 )
+##### **unordered_set** ( 仅用来去重 )
 
 #### map (键值对)
 
-  - **map** ( 用于key需要排序的情况 )
+##### **map** ( 用于key需要排序的情况 )
 
-    - 键值对声明
+- 键值对声明
 
-    ```C++
-    map<T1,T2>mp;	// 一般声明,keys升序排序
-    map<T1,T2,greater<T1> >mp;	// keys降序排序
-    map<T1,T2,decltype(cmp)> mp(cmp);	// 自定义排序规则
+- ```C++
+  map<T1,T2>mp;	// 一般声明,keys升序排序
+  map<T1,T2,greater<T1> >mp;	// keys降序排序
+  map<T1,T2,decltype(cmp)> mp(cmp);	// 自定义排序规则
+  
+  auto cmp=[](T1 a,T2 b){retrun 表达式(例: a>b );} // 自定义
+  ```
 
-    auto cmp=[](T1 a,T2 b){retrun 表达式(例: a>b );} // 自定义
-    ```
+- 基本操作
 
-    - 基本操作
+- ```C++
+  mp.size();	//返回keys元素的数目
+  mp.empty();	//判断是否为空,返回值bool
+  
+  mp[key]=value;	// 插入键值对{key:val}
+  mp.erase(key);	// 删除map中键为key的键值对
+  
+  mp.count(key);	// 统计key元素的个数
+  mp.find(key);	// 查找key是否存在,存在则返回it,否则返回mp.end()
+  
+  for(auto it = mp.begin();it != mp.end();it++){
+  if(mp.find(key)==mp.end()){}	// 未查找到元素的情况
+  cout << "key:"<<it->first;		// 访问用it->first为键key,it->second为值val
+  cout <<"value:"<< it->second;
+  }
+  
+  ```
 
-    ```C++
-    mp.size();	//返回keys元素的数目
-    mp.empty();	//判断是否为空,返回值bool
+  
 
-    mp[key]=value;	// 插入键值对{key:val}
-    mp.erase(key);	// 删除map中键为key的键值对
+##### **multimap** ( 用于键key可重复的情况 )
 
-    mp.count(key);	// 统计key元素的个数
-    mp.find(key);	// 查找key是否存在,存在则返回it,否则返回mp.end()
-
-    for(auto it = mp.begin();it != mp.end();it++){
-    if(mp.find(key)==mp.end()){}	// 未查找到元素的情况
-    cout << "key:"<<it->first;		// 访问用it->first为键key,it->second为值val
-    cout <<"value:"<< it->second;
-    }
-
-    ```
-
-      
-
-  - **multimap** ( 用于键key可重复的情况 )
-
-  - **unordered_map** ( 不需要排序, 性能最好, 最常用 )
+##### **unordered_map** ( 不需要排序, 性能最好, 最常用 )
 
 ---
 
@@ -696,7 +692,7 @@
 
 #### 贪心
 
-鼠目寸光: 不从整体最优上加以考虑，而是始终做出**在当前看来最好的选择**
+鼠目寸光: 不从整体最优上加以考虑，而是始终做出**在当前看来最好的选择**,刷题!刷题!再刷题!
 
 - 注意点:
 
@@ -806,7 +802,7 @@
   2. 借助数学归纳思想, 确定递推公式 ( 状态转移方程 )
   3. dp数组如何初始化
   4. 确定遍历顺序
-  5. 举例推导dp数组
+  5. 举例推导 ( 或打印 ) dp数组 ( debug ) 
 
 - 一般模板
 
