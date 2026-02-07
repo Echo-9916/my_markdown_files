@@ -76,31 +76,33 @@
 
 ##### 模板函数
 
-1. **is_prime** ( 素数判断 )
+1. **is_prime** ( 素数 )
 
    ```C++
-   bool isPrime(int n) {
-     if (n < 2) return false;
-     // i * i <= n 可能会溢出，建议写成 i <= n / i
-     for (int i = 2; i <= n / i; i++) {
-         if (n % i == 0) return false;
-     }
-     return true;
+   vector<bool> isPrime(n, true);
+   void Prime(){
+       // 素数筛选法
+       for (int i = 2; i * i < MAX_N; i++) {
+           if (isPrime[i]) {
+               for (int j = i * i; j < MAX_N; j += i) {
+                   isPrime[j] = false;
+               }
+           }
+       }
    }
    ```
 
  2.  **Factorial** ( 阶乘 )
 
      ```C++
-     vector<long long> fact(2e5,1);
-     void Factorial(long long n){// 预处理操作,直接以数组形式调用
-         fact[0] = 1;
+     vector<long long> fact(MAX_N,1);// 太大的空间开不出来,数组大小需要控制
+     void Factorial(){// 预处理操作,直接以数组形式调用
          for (int i = 1; i < MAX_N; i++){
              fact[i] = (fact[i - 1] * i) % MOD;
          }
      }
      ```
-
+     
 3. **GCD,LCM**  ( 辗转相除法 )     
 
    ```C++
@@ -191,6 +193,18 @@
 
 #### 位运算
 
+- 运算符号
+
+| 数学符号表示 | 运算符 | 运算性质                          |
+| :----------: | :----: | --------------------------------- |
+|     AND      |   &    | 只有两个对应位都为 1 时才为 1     |
+|      OR      |   \|   | 只要两个对应位中有一个 1 时就为 1 |
+|     NOT      |   ~    | 0 变为 1, 1 变为 0                |
+|    XOR,⊕     |   ^    | 只有两个对应位不同时才为 1        |
+|              |        |                                   |
+
+
+
 - 运算结论
 
 |  序号   | 公式表达                     | 结论说明                               |
@@ -208,9 +222,18 @@
 |   11    | a & ~(1 << b)                | 将 a 的第 b 位设置为 0                 |
 |   12    | a \| (1 << b)                | 将 a 的第 b 位设置为 1                 |
 |   13    | a ^ (1 << b)                 | 将 a 的第 b 位取反                     |
+|   14    | a & (1 << b)                 | 获取 a 的第 b 位编号                   |
+|   15    | bool f = ((x ^ y) < 0);      | 判断 x, y 是否异号                     |
+|         |                              |                                        |
 |         |                              |                                        |
 
+#### 名词解释
 
+1. <u>乘法逆元</u> : 根据费马小定理，在模数 m 为质数，且 b 不是 m的倍数的情况下有：$\frac{a}{b}\mathrm{~mod~}MOD=a\times(b^{MOD-2})\mathrm{~mod~}MOD$​
+2. <u>长度为 n 的排列</u>：由 $1,2,…,n$​ 这 n 个整数、按任意顺序组成的数组（每个整数均恰好出现一次）。例如，{2,3,1,5,4}是一个长度为 5 的排列，而 {1,2,2}和 {1,3,4}都不是排列，因为前者存在重复元素，后者包含了超出范围的数。
+3. <u>MEX</u>: MEX 定义为没有出现在集合中的最小非负整数。例如，$MEX⁡(1,2,3)=0、MEX(0,2,5)=1$。
+4. <u>数组的字典序比较</u>: 从左到右逐个比较两个数组的元素。如果在某个位置上元素不同，比较这两个元素的大小，元素小的数组字典序也小。如果一直比较到其中一个数组结束，则长度较短的数组字典序更小。例如, {2,3,4,5} 的字典序小于 {2,4,3,5},也小于 {3,2,4,5}
+5. <u>连通块</u>: 在网格中，若两个坐标间的曼哈顿距离为 1 则视为相邻。由数值相等的格子按该相邻关系划分的极大连通子集称为一个连通块。
 
 ---
 
@@ -549,6 +572,75 @@
 
 ## 基础算法
 
+#### 二分法
+
+利用数据的**有序性**，每轮缩小一半搜索范围，直至找到目标元素或搜索区间为空为止
+
+- 二分查找**目标元素**target索引
+
+- ```C++
+  /* 二分查找目标元素（左闭右开区间） */
+  int binarySearchLCRO(vector<int> &nums, int target) {// nums必须有序
+      // 初始化左闭右开区间 [0, n) ，即 i, j 分别指向数组首元素、尾元素+1
+      int i = 0, j = nums.size();
+      // 循环，当搜索区间为空时跳出（当 i = j 时为空）
+      while (i < j) {
+          int m = i + (j - i) / 2; // 计算中点索引 m, 防止溢出
+          if (nums[m] < target)    // 此情况说明 target 在区间 [m+1, j) 中
+              i = m + 1;
+          else if (nums[m] > target) // 此情况说明 target 在区间 [i, m) 中
+              j = m;
+          else // 找到目标元素，返回其索引
+              return m;
+      }
+      // 未找到目标元素，返回 -1
+      return -1;
+  }
+  ```
+
+- 二分查找**插入点** ( 存在重复元素 )
+
+- ```C++
+  /* 二分查找插入点（左闭右开区间） */
+  int binarySearchInsertion(vector<int> &nums, int target) {
+      int i = 0, j = nums.size(); // 初始化左闭右开区间 [0, n)
+      while (i < j) {             // 当 i == j 时，区间为空，循环结束
+          int m = i + (j - i) / 2; // 计算中点索引 m
+          if (nums[m] < target) {
+              i = m + 1;           // target 在区间 [m+1, j) 中
+          } else if (nums[m] > target) {
+              j = m;              // target 在区间 [i, m) 中, 可与else直接合并
+          } else {
+              j = m;    // 关键点：为了找到最左侧插入点，即便相等也收缩右边界
+          }
+      }
+      // 返回插入点 i (此时 i == j)
+      return i;
+  }
+  ```
+
+- 哈希查找, 利用键值对 { 元素,索引 }来记录位置,本质是借助计数排序的思想
+
+- ```C++
+  // 预处理：空间 O(n)，时间 O(n)
+  unordered_map<int, int> setupHash(vector<int> &nums) {
+      unordered_map<int, int> dic;
+      // 倒序遍历，确保记录的是相同元素的第一个（最左侧）索引
+      for (int i = nums.size() - 1; i >= 0; i--) {
+          dic[nums[i]] = i;
+      }
+      return dic;
+  }
+  
+  // 查找：时间 O(1)
+  int findTarget(unordered_map<int, int> &dic, int target) {
+      if (dic.find(target) != dic.end()) {
+          return dic[target];
+      }
+      return -1; // 如果不存在，哈希表无法直接给出“插入点”
+  }
+  ```
+
 #### 前缀和/差分
 
 - 一维前缀和
@@ -789,11 +881,17 @@
   - 关于优化
     - 组合类问题, 如果仅用于求符合解的个数, 可以使用dp优化[例: 目标和](https://leetcode.cn/problems/target-sum/)
 
+#### DFS ( 深度优先搜索)
+
+
+
+#### BFS ( 广度优先搜读 )
+
 ---
 
 
 
-## Dynamic Programming (动态规划)
+## DP (动态规划)
 
 将一个问题**分解**为一系列更小的子问题，并通过**存储子问题的解**来避免重复计算, 旧状态+决策=新状态
 
@@ -936,7 +1034,9 @@ graph LR
 
   
 
+## 数据结构
 
+#### 单调栈
 
 ​		
 
