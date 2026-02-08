@@ -16,12 +16,13 @@
   #include<bits/stdc++.h>			// 万能头文件
   using namespace std;
   
-  using ll=long long;				// 简化long long 数据类型的声明
-  const int MOD=998244353;		// 取模值(质数),也有1e9+7
+  #define endl '\n'
+  #define int long long			// 简化long long 数据类型的声明			
+  const int MOD=998244353;		// 取模值(质数),也有1e9+7	
   
   void solve(){}					// 实际解决方案
   
-  int main(){
+  signed main(){
       
       ios::sync_with_stdio(false); // 加速外挂
       cin.tie(nullptr);			// endl换为 '\n'
@@ -32,7 +33,7 @@
       return 0;
   }
   ```
-
+  
   
 
 
@@ -49,6 +50,7 @@
 
 - 题设与矩阵相关,各行输入的`元素间连续`(同一行内每个元素间无空格),则优先以`vector<string>v`存储[01回文](https://ac.nowcoder.com/acm/contest/120562/I)
 - 需要打表存储固定数据时,可`压缩存储`为0/1矩阵,输出可考虑"`"YN"[条件]`来简化[A+B Problem](https://ac.nowcoder.com/acm/contest/120561/A)|[01矩阵](https://ac.nowcoder.com/acm/contest/120562/E)
+- 1s大概$10^8$循环量,数据量较大的容器遍历可能超时,数据随机可以尝试暴力求解
 
 
 
@@ -76,6 +78,7 @@
 -  `max(a,b)`, `min(a,b)`. `abs()`. `sqrt()`.
 - `hypot(dx, dy)`：直接计算 $\sqrt{dx^2 + dy^2}$，防止溢出。
 - `gcd(a, b)` / `lcm(a, b)`：最大公约数与最小公倍数。
+- `__lg(x)` 返回的是 $x$ 的二进制表示中，**最高位 1 所在的位置（从 0 开始计数）**
 
 ##### 模板函数
 
@@ -195,9 +198,9 @@
 
 5. 三角形面积 
 
-   - 根据**几何坐标**: $Area=\frac{1}{2}|x_1(y_2-y_3)+x_2(y_3-y_1)+x_3(y_1-y_2)|$
+   - 根据**几何坐标**(向量叉乘): $Area=\frac{1}{2}|x_1(y_2-y_3)+x_2(y_3-y_1)+x_3(y_1-y_2)|$,本质为$|\overrightarrow{OA}\times\overrightarrow{OB}|$
 
-   - 根据**边长长度**: $Area=\sqrt{s(s-a)(s-b)(s-c)}, s=\frac{a+b+c}{2}$
+   - 根据**边长长度**(海伦公式): $Area=\sqrt{s(s-a)(s-b)(s-c)}, s=\frac{a+b+c}{2}$
 
    
 
@@ -918,9 +921,136 @@
 
 #### DFS ( 深度优先搜索)
 
+dfs是可一个方向去搜，不到黄河不回头，直到遇到绝境了，搜不下去了，再换方向（换方向的过程就涉及到了回溯）
+
+- 代码框架: 
+
+  ```C++
+  vector<vector<int>> result; // 保存符合条件的所有路径
+  vector<int> path; // 起点到终点的路径
+  
+  void dfs(参数) {
+      if (终止条件) {
+          存放结果;
+          return;
+      }
+      for (选择：本节点所连接的其他节点) {
+          处理节点;
+          dfs(图，选择的节点); // 递归
+          回溯，撤销处理结果
+      }
+  }
+  ```
+
+- 以[岛屿问题(一)孤岛计数](https://kamacoder.com/problempage.php?pid=1171#)为例
+
+- ```C++
+  int dir[4][2] = {0, 1, 1, 0, 0, -1, -1, 0};// 表示方向
+  // grid 是地图，也就是一个二维数组
+  // visited标记访问过的节点，不要重复访问
+  // i,j 表示开始搜索节点的下标
+  void dfs(const vector<vector<int>>& grid, int i, int j, vector<vector<bool>>& visited)
+  {
+      if (grid[i][j] == 0 || visited[i][j]) return;
+      visited[i][j] = true;// 标记该节点已被访问过
+  
+      for (int k = 0; k < 4; k++){
+          int x = i + dir[k][0];
+          int y = j + dir[k][1];
+          if (x < 0 || x >= grid.size() || y < 0 || y >= grid[0].size()) continue;//越界
+          dfs(grid, x, y, visited);// 递归搜索
+      }
+  }
+  
+  int main()
+  {
+      int n, m;
+      cin >> n >> m;
+      vector<vector<int>> grid(n, vector<int>(m));
+      for (auto& i : grid){
+          for (auto& j : i){
+              cin >> j;
+          }
+      }
+      
+      vector<vector<bool>> visited(n, vector<bool>(m));
+      int ans = 0;
+      for (int i = 0; i < n; i++){
+          for (int j = 0; j < m; j++){
+              if (!visited[i][j] && grid[i][j] == 1){
+                  ans++;
+                  dfs(grid, i, j, visited);
+              }
+          }
+      }
+      cout << ans << endl;
+      return 0;
+  }
+  
+  ```
+
+- 
+
 
 
 #### BFS ( 广度优先搜读 )
+
+bfs是先把本节点所连接的所有节点遍历一遍，走到下一个节点的时候，再把连接节点的所有节点遍历一遍，搜索方向更像是广度，四面八方的搜索过程
+
+- 代码框架:
+
+  - 注意: 队列的含义: 队列中的节点表示已经走过的节点, 只要加入队列, 就立即标记该节点走过
+
+- ```C++
+  // 伪代码
+  void bfs(图,vistied,起点坐标(x,y) ){
+      定义声明队列
+      起始节点加入队列,并标记访问
+          
+      while(队列不为空){
+          取队首元素并出队
+          ...(基本处理)
+              
+          for(基于该节点,入队相关节点){
+              ...
+              if(!visited(..)){
+                  入队未访问过的节点
+                  标记访问
+              }
+          }
+      }
+  }
+  ```
+
+- 以[岛屿问题(一)孤岛计数](https://kamacoder.com/problempage.php?pid=1171#)为例 
+
+- ```C++
+  int dir[4][2] = {0, 1, 1, 0, 0, -1, -1, 0}; // 表示四个方向
+  // grid 是地图，也就是一个二维数组
+  // visited标记访问过的节点，不要重复访问
+  // i,j 表示开始搜索节点的下标
+  void bfs(const vector<vector<int>>& grid, int i, int j, vector<vector<bool>>& visited)
+  {
+      queue<pair<int, int>> q;// 定义队列
+      q.emplace(i, j); // 起始节点加入队列
+      visited[i][j] = true;// 只要加入队列，立刻标记为访问过的节点
+      while (!q.empty()){// 开始遍历队列里的元素
+          auto [x, y] = q.front();// 从队列取元素
+          q.pop();
+          for (int k = 0; k < 4; k++){ // 开始想当前节点的四个方向左右上下去遍历
+              int xx = x + dir[k][0];
+              int yy = y + dir[k][1];// 获取周边四个方向的坐标
+              if (xx < 0 || xx >= grid.size() || yy < 0 || yy >= grid[0].size()) continue; // 坐标越界了，直接跳过
+              if (grid[xx][yy] == 0 || visited[xx][yy]) continue;// 如果节点没被访问过
+              q.emplace(xx, yy);// 队列添加该节点为下一轮要遍历的节点
+              visited[xx][yy] = true; // 只要加入队列立刻标记，避免重复访问
+          }
+      }
+  }
+  int main(){ /*主函数同上*/ }
+  ```
+
+- 
 
 ---
 
@@ -1073,6 +1203,48 @@ graph LR
 
 #### 二叉树
 
+1. 二叉树的遍历:
+
+- 深搜遍历 (前中后序遍历)
+
+  ```C++
+  // 后序遍历
+  void traversal(TreeNode* cur, vector<int>& vec) {
+      if (cur == NULL) return;
+      // 前序遍历处理位置
+      traversal(cur->left, vec);  // 左
+      // 中序遍历位置
+      traversal(cur->right, vec); // 右
+      vec.push_back(cur->val);    // 中, 后序遍历位置
+  }
+  ```
+
+- 广搜遍历 (层序遍历)
+
+  ```C++
+  vector<vector<int>> levelOrder(TreeNode* root) {
+      queue<TreeNode*> que;
+      if (root != NULL) que.push(root);
+      vector<vector<int>> result;
+      while (!que.empty()) {
+          int size = que.size();
+          vector<int> vec;
+          // 这里一定要使用固定大小size，不要使用que.size()，因为que.size是不断变化的
+          for (int i = 0; i < size; i++) {
+              TreeNode* node = que.front();
+              que.pop();
+              vec.push_back(node->val);
+              if (node->left) que.push(node->left);
+              if (node->right) que.push(node->right);
+          }
+          result.push_back(vec);
+      }
+      return result;
+  }
+  ```
+
+  
+
 ##### 完全二叉树
 
 1. 节点编号的父子关系 ( 根节点编号为1 )
@@ -1113,7 +1285,7 @@ graph LR
 
 #### 2026牛客寒假算法基础集训营
 
-| 题目 | 第一场 ( 7/12)          | 第二场 ( 6/10)    | 第三场 (  5/10)        | 第四场 | 第五场 | 第六场 |
+| 题目 | 第一场 ( 7/12)          | 第二场 ( 6/10)    | 第三场 ( 7/10)         | 第四场 | 第五场 | 第六场 |
 | ---- | ----------------------- | ----------------- | ---------------------- | ------ | ------ | ------ |
 | A    | 状压、枚举、概率、逆元  | 简单思维          | 枚举、简单数学         |        |        |        |
 | B    | 贪心、思维、数学        | 排序、贪心        | 暴力、概率、gcd        |        |        |        |
