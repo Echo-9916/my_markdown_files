@@ -19,7 +19,8 @@
 
 | 文件 | 主题 |
 |------|------|
-| [`algorithm.html`](./algorithm.html) | 算法学习笔记 |
+| [`algorithm.html`](./items/algorithm/algorithm.html) | 算法学习笔记 |
+| [`network.html`](./items/curriculum/network.html)|计网复习笔记|
 
 > 💡 新笔记会持续更新，欢迎常回来看看！
 
