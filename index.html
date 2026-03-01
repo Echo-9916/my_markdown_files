@@ -1,132 +1,218 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>我的笔记 · LiuEcho</title>
-  <meta name="description" content="记录学习与思考的点滴" />
-  <style>
-    :root {
-      --bg: #ffffff;
-      --text: #2d3748;
-      --link: #3182ce;
-      --card-bg: #f8fafc;
-      --border: #e2e8f0;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Digital Garden | 个人空间</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&family=Playfair+Display:italic,wght@700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #f8f9fa; /* 主背景稍微带一点灰，衬托纯白卡片 */
+            --card-bg: #ffffff;
+            --text-main: #1a1a1a;
+            --text-sub: #666;
+            --accent: #c2a478;
+            --card-border: rgba(0,0,0,0.05);
+            /* 核心：多层柔和阴影 */
+            --card-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.04), 0 20px 60px -10px rgba(0, 0, 0, 0.02);
+            --card-shadow-hover: 0 30px 60px -12px rgba(0, 0, 0, 0.12), 0 18px 36px -18px rgba(0, 0, 0, 0.08);
+            --nav-bg: rgba(248, 249, 250, 0.8);
+            --transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
 
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --bg: #1a202c;
-        --text: #e2e8f0;
-        --link: #63b3ed;
-        --card-bg: #2d3748;
-        --border: #4a5568;
-      }
-    }
+        [data-theme="dark"] {
+            --bg-color: #050505; /* 极黑背景 */
+            --card-bg: #111111; /* 深灰色卡片，形成对比 */
+            --text-main: #e0e0e0;
+            --text-sub: #888;
+            --accent: #d4b996;
+            --card-border: rgba(255,255,255,0.03);
+            --card-shadow: 0 10px 40px rgba(0,0,0,0.4);
+            --card-shadow-hover: 0 20px 50px rgba(0,0,0,0.6);
+            --nav-bg: rgba(5, 5, 5, 0.8);
+        }
 
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: 'Inter', -apple-system, sans-serif;
+            transition: background-color 0.6s ease;
+            -webkit-font-smoothing: antialiased;
+        }
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-      background-color: var(--bg);
-      color: var(--text);
-      line-height: 1.6;
-      padding: 2rem 1rem;
-    }
+        /* 导航 */
+        nav {
+            position: fixed;
+            top: 0; width: 100%;
+            padding: 30px 8%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            z-index: 100;
+            background: var(--nav-bg);
+            backdrop-filter: blur(15px);
+        }
 
-    .container {
-      max-width: 800px;
-      margin: 0 auto;
-    }
+        .logo { font-family: 'Playfair Display', serif; font-size: 1.5rem; font-weight: 700; letter-spacing: -1px; }
 
-    header {
-      text-align: center;
-      margin-bottom: 2.5rem;
-    }
+	.nav-links a {
+            text-decoration: none;
+            color: var(--text-main);
+            margin-left: 35px;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            transition: var(--transition);
+        }
+        .nav-links a:hover { color: var(--accent); }
 
-    h1 {
-      font-size: 2.2rem;
-      font-weight: 700;
-      margin-bottom: 0.5rem;
-    }
+        /* 右下角悬浮按钮 */
+        #theme-toggle {
+            position: fixed;
+            bottom: 40px; right: 40px;
+            width: 56px; height: 56px;
+            border-radius: 50%;
+            border: 1px solid var(--card-border);
+            background: var(--card-bg);
+            color: var(--text-main);
+            cursor: pointer;
+            z-index: 1000;
+            display: flex; align-items: center; justify-content: center;
+            box-shadow: var(--card-shadow);
+            transition: var(--transition);
+        }
 
-    .subtitle {
-      color: var(--link);
-      font-size: 1.1rem;
-    }
+        #theme-toggle:hover { transform: scale(1.1); box-shadow: var(--card-shadow-hover); }
 
-    .notes-list {
-      list-style: none;
-    }
+        .icon-sun, .icon-moon {
+            position: absolute; width: 20px; height: 20px;
+            fill: none; stroke: currentColor; stroke-width: 1.5;
+        }
 
-    .note-item {
-      background: var(--card-bg);
-      border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 1.2rem;
-      margin-bottom: 1rem;
-      transition: transform 0.2s, box-shadow 0.2s;
-    }
+        [data-theme="dark"] .icon-sun { transform: translateY(30px); opacity: 0; }
+        .icon-moon { transform: translateY(-30px); opacity: 0; }
+        [data-theme="dark"] .icon-moon { transform: translateY(0); opacity: 1; }
 
-    .note-item:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
+        /* Hero */
+        .hero { height: 60vh; display: flex; flex-direction: column; justify-content: center; padding: 0 12%; }
+        .hero h1 { font-family: 'Playfair Display', serif; font-size: clamp(2.5rem, 8vw, 5rem); line-height: 1.1; margin-bottom: 20px; }
 
-    .note-item a {
-      text-decoration: none;
-      color: var(--link);
-      font-size: 1.25rem;
-      font-weight: 600;
-      display: block;
-    }
+        /* 内容网格 - 卡片样式升级 */
+        .content-grid {
+            padding: 0 12% 120px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 50px;
+        }
 
-    .note-item a:hover {
-      text-decoration: underline;
-    }
+        .card {
+            text-decoration: none;
+            color: inherit;
+            display: block;
+            padding: 50px 40px;
+            background-color: var(--card-bg); /* 卡片背景色 */
+            border: 1px solid var(--card-border);
+            border-radius: 12px; /* 稍微增加一点圆角显得更现代 */
+            box-shadow: var(--card-shadow); /* 默认阴影 */
+            transition: var(--transition);
+        }
 
-    footer {
-      text-align: center;
-      margin-top: 2rem;
-      color: var(--link);
-      font-size: 0.9rem;
-    }
+        .card:hover {
+            transform: translateY(-10px);
+            box-shadow: var(--card-shadow-hover); /* 悬停时深度增加 */
+            border-color: var(--accent);
+        }
 
-    @media (max-width: 600px) {
-      body {
-        padding: 1.5rem 0.8rem;
-      }
-      h1 {
-        font-size: 1.8rem;
-      }
-    }
-  </style>
+        .card.offset { margin-top: 80px; }
+
+        .card-tag {
+            font-size: 0.7rem;
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 20px;
+            display: block;
+        }
+
+        .card h3 { font-family: 'Playfair Display', serif; font-size: 2rem; margin-bottom: 15px; }
+        .card p { font-size: 0.95rem; color: var(--text-sub); line-height: 1.8; }
+
+        footer { padding: 80px 12%; border-top: 1px solid var(--card-border); color: var(--text-sub); font-size: 0.8rem; display: flex; justify-content: space-between; }
+
+        @media (max-width: 900px) {
+            .content-grid { grid-template-columns: 1fr; gap: 30px; }
+            .card.offset { margin-top: 0; }
+            .hero { height: 50vh; }
+        }
+    </style>
 </head>
 <body>
-  <div class="container">
-    <header>
-      <h1>📚 我的笔记</h1>
-      <p class="subtitle">记录学习与思考的点滴</p>
-    </header>
 
-    <ul class="notes-list">
-      <li class="note-item">
-        <a href="items/algorithm/algorithm.html">🧮 算法笔记</a>
-      </li>
-    </ul>
-    <ul class="notes-list">
-      <li class="note-item">
-        <a href="items/curriculum/network.html">🌐 计网笔记</a>
-      </li>
-    </ul>
+    <button id="theme-toggle" aria-label="Toggle Theme">
+        <svg class="icon-sun" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+        <svg class="icon-moon" viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+    </button>
+
+    <nav>
+        <div class="logo">MUSEUM.</div>
+	<div class="nav-links">
+		<a href="#">Works</a>
+		<a href="https://github.com/">GitHub</a>
+	</div>
+    </nav>
+
+    <section class="hero">
+        <h1>Curated <br>Thought <i>&</i> Design.</h1>
+        <p>这里不仅是代码的存放地，更是关于美学、逻辑与生活的实验场。</p>
+    </section>
+
+    <main class="content-grid">
+        <a href="items/algorithm/algorithm.html" class="card">
+            <span class="card-tag">Engineering / 01</span>
+            <h3>🧮 算法笔记</h3>
+            <p>探讨如何在复杂性中寻找简洁的平衡点，沉淀数据结构与算法的逻辑之美。</p>
+        </a>
+
+        <a href="items/curriculum/network.html" class="card offset">
+            <span class="card-tag">Network / 02</span>
+            <h3>🌐 计网笔记</h3>
+            <p>探索互联网底层协议的运行机制，构建从物理层到应用层的完整体系。</p>
+        </a>
+
+        <a href="#" class="card">
+            <span class="card-tag">Notes / 03</span>
+            <h3>深度的阅读笔记</h3>
+            <p>从古典哲学到现代 AI，在文字的丛林中构建属于自己的知识图谱。</p>
+        </a>
+
+        <a href="#" class="card offset">
+            <span class="card-tag">Project / 04</span>
+            <h3>开源项目集锦</h3>
+            <p>记录我在 GitHub 上的所有实验性尝试，关于创造与解决问题的实践。</p>
+        </a>
+    </main>
 
     <footer>
-      <p>Powered by Cloudflare Pages · 自动更新</p>
+        <div>&copy; 2026 Crafted by Gemini.</div>
+        <div>Keep moving forward.</div>
     </footer>
-  </div>
+
+    <script>
+        const btn = document.getElementById('theme-toggle');
+        const html = document.documentElement;
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme) { html.setAttribute('data-theme', savedTheme); }
+        btn.addEventListener('click', () => {
+            if (html.getAttribute('data-theme') === 'dark') {
+                html.removeAttribute('data-theme');
+                localStorage.setItem('theme', 'light');
+            } else {
+                html.setAttribute('data-theme', 'dark');
+                localStorage.setItem('theme', 'dark');
+            }
+        });
+    </script>
 </body>
 </html>
