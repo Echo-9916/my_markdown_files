@@ -141,47 +141,62 @@
 
         footer { padding: 80px 12%; border-top: 1px solid var(--card-border); color: var(--text-sub); font-size: 0.8rem; display: flex; justify-content: space-between; }
 
-        /* 移动端适配优化 */
+        /* 移动端适配修复方案 */
         @media (max-width: 900px) {
-            /* 1. 调整网格布局，确保宽度占满 */
+            /* 1. 增加 body 顶部内边距，防止内容被 fixed 导航栏遮挡 */
+            body {
+                padding-top: 80px; 
+            }
+
+            /* 2. 调整 Hero 区域：减小高度，增加内部 padding 确保文字居中不被遮 */
+            .hero { 
+                height: auto; 
+                min-height: 35vh; /* 缩减高度 */
+                padding: 40px 8%; 
+                justify-content: flex-start; /* 让文字从导航栏下方开始排列 */
+            }
+
+            .hero h1 {
+                font-size: 2.8rem; /* 适当缩小移动端字号 */
+                line-height: 1.2;
+            }
+
+            /* 3. 卡片布局：拉长宽度，缩减高度 */
             .content-grid { 
                 grid-template-columns: 1fr; 
-                gap: 20px; /* 减小卡片之间的间距 */
-                padding: 0 5% 80px; /* 缩小侧边留白 */
+                gap: 16px; 
+                padding: 0 5% 100px; /* 减小侧边距，让卡片更宽 */
             }
 
-            /* 2. 移除错位效果，避免移动端高度冗余 */
-            .card.offset { margin-top: 0; }
-
-            /* 3. 核心修改：拉长宽度，缩减高度 */
             .card {
-                padding: 25px 30px; /* 大幅减小上下 padding (从 50px 降至 25px) */
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-                min-height: auto; /* 取消最小高度限制 */
-            }
-
-            /* 4. 压缩内部元素的间距 */
-            .card-tag {
-                margin-bottom: 8px; /* 减小标签底边距 */
+                padding: 24px 20px; /* 极简上下间距，实现高度缩减 */
+                margin-top: 0 !important; /* 强制取消 PC 端的 offset 错位 */
+                border-radius: 10px;
             }
 
             .card h3 {
-                font-size: 1.6rem; /* 稍微缩小移动端标题字号 */
-                margin-bottom: 8px; /* 减小标题底边距 */
+                font-size: 1.5rem;
+                margin-bottom: 8px;
             }
 
             .card p {
                 font-size: 0.9rem;
-                line-height: 1.5; /* 稍微压缩行高 */
+                line-height: 1.5;
             }
 
-            .hero { height: 40vh; } /* 进一步缩减 Hero 区高度 */
+            /* 4. 导航栏微调 */
+            nav {
+                padding: 20px 8%;
+            }
             
+            .nav-links {
+                display: none; /* 移动端隐藏冗余链接，保持高级感 */
+            }
+
+            /* 5. 悬浮按钮位置优化 */
             #theme-toggle {
-                bottom: 25px;
-                right: 25px;
+                bottom: 30px;
+                right: 20px;
                 width: 48px;
                 height: 48px;
             }
