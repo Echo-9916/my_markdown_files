@@ -97,7 +97,8 @@
 1. **is_prime** ( 素数 )
 
    ```C++
-   vector<bool> Prime(n, true);
+   // 版本一:判断是否为素数
+   vector<bool> isPrime(n, true);
    void Prime(){
        // 素数筛选法
        for (int i = 2; i * i < MAX_N; i++) {s
@@ -105,6 +106,26 @@
                for (int j = i * i; j < MAX_N; j += i) {
                    isPrime[j] = false;
                }
+           }
+       }
+   }
+   
+   // 版本二
+   const int N = 1e8 + 10;
+   bitset<N> isNotPrime; // 0 为素数，1 为非素数
+   vector<int> primeList;// 记录前n个素数
+   
+   void initPrime()
+   {
+       // 素数筛选法
+       isNotPrime[0] = isNotPrime[1] = 1;
+       for (int i = 2; i < N; i++){
+           if (!isNotPrime[i]) primeList.push_back(i);
+           if (primeList.size() >= n) break;// 只需要n个素数列表,提前返回
+           for (int p : primeList){
+               if (i * p >= 1e8) break;// 防止越界访问 bitset
+               isNotPrime[i * p] = 1;
+               if (i % p == 0) break;// 线性筛精髓：保证每个合数只被筛一次
            }
        }
    }
@@ -1320,6 +1341,8 @@ graph LR
 - [智乃的算法竞赛群友 (标签:小n动态规划+滚动数组, 大n贪心优化 )](https://ac.nowcoder.com/acm/contest/120565/F)
 - [智乃挖坑 (标签:二分,前缀和差分/二阶差分)](https://ac.nowcoder.com/acm/contest/120565/I)
 - [智乃的合并果子 (标签:贪心+优先队列)](https://ac.nowcoder.com/acm/contest/120565/D)
+
+
 
 
 
