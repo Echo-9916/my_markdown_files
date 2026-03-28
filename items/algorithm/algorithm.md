@@ -206,7 +206,12 @@
    ```C++
    (index+Δstep)%n;			// 顺时针循环
    (index-Δstep%n+n)%n;		// 逆时针循环
+   
    ```
+
+   - 当多次循环处理结果不受循环次数影响时,可以进行`2*n`次循环来处理
+
+     `for (int i = 0; i < nums.size() * 2; i++) {}`
 
 3. 两点间距 $\sqrt {(x_1-x_2)^2+(y_1-y_2)^2}$​
 
@@ -896,11 +901,11 @@
 
 #### 单调栈
 
-通常是⼀维数组，要寻找任⼀个元素的右边或者左边第⼀个⽐⾃⼰⼤或者⼩的元素的位置,考虑单调栈
+要寻找任⼀个元素的右边或者左边第⼀个⽐⾃⼰⼤或者⼩的元素的位置,考虑单调栈
 
-- **单调栈**: 单调栈的本质是空间换时间,在遍历的过程中需要⽤⼀个栈来**记录右边第⼀个⽐当前元素⾼的元素**，优点是整个数组只需要遍历⼀次,单调栈⾥只需要存放元素的下标`i` 	
+- **单调栈**: 本质是空间换时间,通过维护**栈中的元素单调性**,在遍历的过程中**记录右边第⼀个⽐当前元素⾼的元素**，优点是整个数组只需要遍历⼀次,单调栈⾥只需要存放元素的下标`i` 	
 
-- 示例代码
+- 一般模板:
 
   ```C++
   stack<int> stk;// 递增栈
@@ -912,6 +917,61 @@
           stk.pop();
       }
       stk.push(i);
+  }
+  ```
+
+
+#### 单调队列(滑动窗口)
+
+**维护元素单调性的队列**就叫做单调队列,可用于**获取窗口内最值**(队首元素)
+
+- 单调队列的设计:
+
+  - **pop**(val)：如果窗口移除的元素val等于单调队列的出口元素，那么队列弹出元素，否则不用任何操作
+  - **push**(va):如果push的元素val大于入口元素的数值，那么就将队列入口的元素弹出，直到push元素的数值小于等于队列入口元素的数值为止
+
+- 一般模板:
+
+  ```C++
+  deque<int> dque; // 使用deque来实现单调队列
+  
+  void pop(int value) {
+      if (!dque.empty() && value == dque.front()) {
+          dque.pop_front();
+      }
+  }
+  
+  void push(int value) {
+      //保持队列里的数值是单调从大到小
+      while (!dque.empty() && value > dque.back()) {
+          dque.pop_back();
+      }
+      dque.push_back(value);// 存储下标也可
+  }
+  ```
+
+- [滑动窗口取最大值 leetcode NO.239 ](https://leetcode.cn/problems/sliding-window-maximum/description/)
+
+  ```C++
+  vector<int> maxSlidingWindow(vector<int>& nums, int k) {
+      //定义单调队列
+      //.....
+      vector<int> result;
+      // 先将前k的元素放进队列
+      for (int i = 0; i < k; i++) { 
+          dque.push(nums[i]);
+      }
+      // result 记录前k的元素的最大值
+      result.push_back(dque.front()); 
+      for (int i = k; i < nums.size(); i++) {
+          // 滑动窗口移除最前面元素
+          dque.pop(nums[i - k]); 
+          // 滑动窗口前加入最后面的元素
+          dque.push(nums[i]); 
+          // 记录对应的最大值
+          result.push_back(dque.front()); 
+      }
+      return result;
   }
   ```
 
